@@ -1,0 +1,767 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Payment - Utilware Dryer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .payment-container {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+            padding: 48px;
+            text-align: center;
+            max-width: 520px;
+            width: 100%;
+            position: relative;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 32px;
+            gap: 16px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .step.active {
+            background: #059669;
+            color: white;
+        }
+        
+        .step.inactive {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .step.completed {
+            background: #10b981;
+            color: white;
+        }
+        
+        .header {
+            margin-bottom: 32px;
+        }
+        
+        .company-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            letter-spacing: -0.025em;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 400;
+        }
+        
+        /* Contact Form Styles */
+        .contact-form {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+        
+        .form-input.error {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+        
+        /* Payment Details */
+        .payment-details {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        
+        .detail-row:last-child {
+            margin-bottom: 0;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+            font-weight: 600;
+        }
+        
+        .detail-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            color: #1e293b;
+            font-weight: 500;
+        }
+        
+        .amount-value {
+            color: #059669;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        /* UPI Section */
+        .upi-section {
+            margin-bottom: 32px;
+            display: none;
+        }
+        
+        .upi-section.active {
+            display: block;
+        }
+        
+        .upi-label {
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        
+        .upi-id {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 12px 16px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 14px;
+            color: #1e293b;
+            margin-bottom: 24px;
+            letter-spacing: 0.025em;
+        }
+        
+        .qr-container {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: inline-block;
+        }
+        
+        .qr-code {
+            width: 180px;
+            height: 180px;
+            border: none;
+        }
+        
+        /* Payment Status */
+        .payment-status {
+            display: none;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+        }
+        
+        .status-success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        
+        .status-failed {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .status-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .status-message {
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            min-width: 140px;
+            justify-content: center;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: #0f172a;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #1e293b;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+        
+        .btn-secondary {
+            background: #ffffff;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+        
+        .btn-success {
+            background: #059669;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #047857;
+        }
+        
+        /* Loading and Animations */
+        .loading {
+            display: none;
+            color: #059669;
+            font-weight: 500;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        
+        .spinner {
+            border: 2px solid #f3f4f6;
+            border-top: 2px solid #059669;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 16px auto 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .timer {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 16px 0;
+            font-size: 14px;
+            color: #92400e;
+            display: none;
+        }
+        
+        .footer {
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .payment-container {
+                padding: 32px 24px;
+                margin: 10px;
+            }
+            
+            .qr-code {
+                width: 160px;
+                height: 160px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .step-indicator {
+                gap: 8px;
+            }
+            
+            .step {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="step-indicator">
+            <div class="step active" id="step1">
+                <span>1</span>
+                <span>Contact</span>
+            </div>
+            <div class="step inactive" id="step2">
+                <span>2</span>
+                <span>Payment</span>
+            </div>
+            <div class="step inactive" id="step3">
+                <span>3</span>
+                <span>Confirmation</span>
+            </div>
+        </div>
+        
+        <div class="header">
+            <div class="company-name">TELSYS</div>
+            <div class="subtitle">Secure Payment Gateway</div>
+        </div>
+        
+        <!-- Contact Form -->
+        <div class="contact-form" id="contactForm">
+            <div class="form-group">
+                <label class="form-label" for="mobile">Mobile Number *</label>
+                <input type="tel" class="form-input" id="mobile" placeholder="Enter 10-digit mobile number" maxlength="10">
+                <div class="error-message" id="mobileError">Please enter a valid 10-digit mobile number</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address (Optional)</label>
+                <input type="email" class="form-input" id="email" placeholder="Enter email for payment receipt">
+                <div class="error-message" id="emailError">Please enter a valid email address</div>
+            </div>
+        </div>
+        
+        <!-- Payment Details -->
+        <div class="payment-details">
+            <div class="detail-row">
+                <span class="detail-label">Product</span>
+                <span class="detail-value">Utilware Dryer</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Quantity</span>
+                <span class="detail-value">1 Unit</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Customer</span>
+                <span class="detail-value" id="customerName">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Total Amount</span>
+                <span class="detail-value amount-value">₹2,499.00</span>
+            </div>
+        </div>
+        
+        <!-- UPI Payment Section -->
+        <div class="upi-section" id="upiSection">
+            <div class="upi-label">UPI Payment Details</div>
+            <div class="upi-id">telsys.ibz@icici</div>
+            
+            <div class="qr-container">
+                <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=telsys.ibz@icici%26pn=Telsys%26am=2499%26cu=INR%26tn=Utilware%20Dryer" alt="UPI Payment QR Code">
+            </div>
+            
+            <div class="timer" id="paymentTimer">
+                Payment session expires in: <strong id="countdown">10:00</strong>
+            </div>
+        </div>
+        
+        <!-- Payment Status -->
+        <div class="payment-status" id="paymentStatus">
+            <div class="status-icon" id="statusIcon">⏳</div>
+            <div class="status-title" id="statusTitle">Processing Payment</div>
+            <div class="status-message" id="statusMessage">Please complete the payment in your UPI app</div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" id="proceedBtn" onclick="proceedToPayment()">
+                Proceed to Payment
+            </button>
+            
+            <button class="btn btn-primary" id="payBtn" onclick="initiatePayment()" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                    <line x1="12" y1="18" x2="12.01" y2="18"/>
+                </svg>
+                Pay with UPI
+            </button>
+            
+            <button class="btn btn-secondary" id="checkStatusBtn" onclick="checkPaymentStatus()" style="display: none;">
+                Check Payment Status
+            </button>
+            
+            <button class="btn btn-success" id="newPaymentBtn" onclick="resetPayment()" style="display: none;">
+                Make New Payment
+            </button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <span id="loadingText">Processing...</span>
+        </div>
+        
+        <div class="footer">
+            <div style="display: flex; align-items: center; gap: 4px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Secured by UPI
+            </div>
+            <span>•</span>
+            <span>SSL Encrypted</span>
+        </div>
+    </div>
+
+    <script>
+        let paymentData = {};
+        let countdownTimer;
+        let paymentCheckInterval;
+        
+        function validateMobile(mobile) {
+            return /^[6-9]\d{9}$/.test(mobile);
+        }
+        
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+        
+        function showError(fieldId, show) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(fieldId + 'Error');
+            
+            if (show) {
+                field.classList.add('error');
+                error.style.display = 'block';
+            } else {
+                field.classList.remove('error');
+                error.style.display = 'none';
+            }
+        }
+        
+        function proceedToPayment() {
+            const mobile = document.getElementById('mobile').value.trim();
+            const email = document.getElementById('email').value.trim();
+            
+            let hasError = false;
+            
+            // Validate mobile
+            if (!validateMobile(mobile)) {
+                showError('mobile', true);
+                hasError = true;
+            } else {
+                showError('mobile', false);
+            }
+            
+            // Validate email if provided
+            if (email && !validateEmail(email)) {
+                showError('email', true);
+                hasError = true;
+            } else {
+                showError('email', false);
+            }
+            
+            if (hasError) return;
+            
+            // Store customer data
+            paymentData = {
+                mobile: mobile,
+                email: email,
+                amount: 2499,
+                product: 'Utilware Dryer',
+                timestamp: new Date().toISOString(),
+                transactionId: 'TXN' + Date.now()
+            };
+            
+            // Update UI
+            document.getElementById('customerName').textContent = mobile;
+            document.getElementById('contactForm').style.display = 'none';
+            document.getElementById('upiSection').classList.add('active');
+            document.getElementById('proceedBtn').style.display = 'none';
+            document.getElementById('payBtn').style.display = 'inline-flex';
+            
+            // Update steps
+            document.getElementById('step1').className = 'step completed';
+            document.getElementById('step2').className = 'step active';
+            
+            // Start countdown timer
+            startCountdown();
+            
+            console.log('Customer data captured:', paymentData);
+        }
+        
+        function initiatePayment() {
+            const upiLink = `upi://pay?pa=telsys.ibz@icici&pn=Telsys&am=2499&cu=INR&tn=Utilware%20Dryer%20${paymentData.transactionId}`;
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loadingText').textContent = 'Opening UPI app...';
+            
+            // Update payment status
+            showPaymentStatus('pending', '⏳', 'Payment Initiated', 'Please complete the payment in your UPI app');
+            
+            // Hide pay button, show status check
+            document.getElementById('payBtn').style.display = 'none';
+            document.getElementById('checkStatusBtn').style.display = 'inline-flex';
+            
+            // Open UPI app
+            window.location.href = upiLink;
+            
+            // Start checking payment status
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                startPaymentStatusCheck();
+            }, 3000);
+            
+            console.log('Payment initiated:', upiLink);
+        }
+        
+        function showPaymentStatus(type, icon, title, message) {
+            const statusDiv = document.getElementById('paymentStatus');
+            const iconDiv = document.getElementById('statusIcon');
+            const titleDiv = document.getElementById('statusTitle');
+            const messageDiv = document.getElementById('statusMessage');
+            
+            statusDiv.className = `payment-status status-${type}`;
+            statusDiv.style.display = 'block';
+            iconDiv.textContent = icon;
+            titleDiv.textContent = title;
+            messageDiv.textContent = message;
+        }
+        
+        function startCountdown() {
+            let timeLeft = 600; // 10 minutes
+            document.getElementById('paymentTimer').style.display = 'block';
+            
+            countdownTimer = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('countdown').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    showPaymentStatus('failed', '⏰', 'Session Expired', 'Payment session has expired. Please try again.');
+                    document.getElementById('checkStatusBtn').style.display = 'none';
+                    document.getElementById('newPaymentBtn').style.display = 'inline-flex';
+                }
+                timeLeft--;
+            }, 1000);
+        }
+        
+        function startPaymentStatusCheck() {
+            let checkCount = 0;
+            const maxChecks = 20; // Check for 2 minutes
+            
+            paymentCheckInterval = setInterval(() => {
+                checkCount++;
+                
+                // Simulate payment status check (replace with actual API call)
+                console.log(`Checking payment status... Attempt ${checkCount}`);
+                
+                // Simulate random success after some time
+                if (checkCount > 3 && Math.random() > 0.7) {
+                    clearInterval(paymentCheckInterval);
+                    paymentSuccess();
+                } else if (checkCount >= maxChecks) {
+                    clearInterval(paymentCheckInterval);
+                    showPaymentStatus('failed', '❌', 'Payment Verification Failed', 
+                        'Unable to verify payment. Please check with your bank or try again.');
+                    document.getElementById('checkStatusBtn').style.display = 'none';
+                    document.getElementById('newPaymentBtn').style.display = 'inline-flex';
+                }
+            }, 6000); // Check every 6 seconds
+        }
+        
+        function checkPaymentStatus() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loadingText').textContent = 'Checking payment status...';
+            
+            // Simulate API call
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                
+                // Simulate payment verification (replace with actual API)
+                if (Math.random() > 0.5) {
+                    paymentSuccess();
+                } else {
+                    showPaymentStatus('pending', '⏳', 'Payment Pending', 
+                        'Payment is still being processed. Please wait or try checking again.');
+                }
+            }, 2000);
+        }
+        
+        function paymentSuccess() {
+            clearInterval(countdownTimer);
+            clearInterval(paymentCheckInterval);
+            
+            showPaymentStatus('success', '✅', 'Payment Successful!', 
+                `₹2,499 paid successfully. Transaction ID: ${paymentData.transactionId}`);
+            
+            document.getElementById('step2').className = 'step completed';
+            document.getElementById('step3').className = 'step completed';
+            document.getElementById('checkStatusBtn').style.display = 'none';
+            document.getElementById('newPaymentBtn').style.display = 'inline-flex';
+            document.getElementById('paymentTimer').style.display = 'none';
+            
+            // Log payment data (replace with actual API call)
+            console.log('Payment successful:', {
+                ...paymentData,
+                status: 'success',
+                completedAt: new Date().toISOString()
+            });
+            
+            // You can send this data to your backend here
+            // sendPaymentDataToServer(paymentData);
+        }
+        
+        function resetPayment() {
+            // Reset all states
+            clearInterval(countdownTimer);
+            clearInterval(paymentCheckInterval);
+            
+            document.getElementById('mobile').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('customerName').textContent = '-';
+            
+            document.getElementById('contactForm').style.display = 'block';
+            document.getElementById('upiSection').classList.remove('active');
+            document.getElementById('paymentStatus').style.display = 'none';
+            document.getElementById('paymentTimer').style.display = 'none';
+            
+            document.getElementById('proceedBtn').style.display = 'inline-flex';
+            document.getElementById('payBtn').style.display = 'none';
+            document.getElementById('checkStatusBtn').style.display = 'none';
+            document.getElementById('newPaymentBtn').style.display = 'none';
+            
+            document.getElementById('step1').className = 'step active';
+            document.getElementById('step2').className = 'step inactive';
+            document.getElementById('step3').className = 'step inactive';
+            
+            paymentData = {};
+        }
+        
+        // Auto-format mobile number
+        document.getElementById('mobile').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '');
+        });
+        
+        // Enter key handlers
+        document.getElementById('mobile').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') proceedToPayment();
+        });
+        
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') proceedToPayment();
+        });
+    </script>
+</body>
+</html>
